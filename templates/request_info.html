@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Профиль пользователя.</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/profile.css">
+    <style>
+        form#create-request-modal h1 {
+            color: white;
+            font-size: 28px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        form#create-request-modal {
+            background-color: black;
+            border: 1px solid #ccc;
+            border-radius: 40px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            margin: 0 auto;
+            max-width: 700px;
+            padding: 110px;
+            text-align: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        form#create-request-modal label {
+            display: block;
+            font-size: 15px;
+            margin: 20px 0 5px;
+            text-align: left;
+        }
+
+        form#create-request-modal textarea, form#create-request-modal select {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            height: 40px;
+            margin-bottom: 20px;
+            padding: 5px;
+            resize: none;
+            width: 100%;
+        }
+
+        form#create-request-modal input[type="text"] {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            height: 20px;
+            margin-bottom: 20px;
+            padding: 5px;
+            resize: none;
+            width: 100%;
+        }
+
+        form#create-request-modal input[type="submit"] {
+            background-color: green;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 25px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        form#create-request-modal input[type="submit"]:hover {
+            background-color: darkgreen;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 100%;
+            left: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9998;
+            display: none;
+        }
+
+        /* стили для черной полоски */
+        .black-bar {
+            background-color: black;
+            height: 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+
+        /* стили для надписи Profile Page */
+        .request-title {
+            font-family: "Bauhaus 93", sans-serif;
+            position: absolute;
+            top: 0;
+            left: 10px;
+            color: white;
+            font-size: 30px;
+            line-height: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* стили для информации о пользователе */
+        .request-info {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .request-info p {
+            font-size: 20px;
+            margin: 10px;
+        }
+
+        .request-info a {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 24px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .request-info a:hover {
+            color: #0056b3;
+        }
+
+        .edit-btn, .close-btn, .view-btn {
+            background-color: green;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .edit-btn:hover, .close-btn:hover, .view-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        .close-form {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="black-bar">
+    <h1 class="request-title">Request</h1>
+</div>
+<div class="request-info">
+    <p>Request Info:
+    <p>
+    <p>Title: {{ _request.title }}</p>
+    <p>Description: {{ _request.description }}</p>
+    <p>Solver: {{ _request.solver.name }}</p>
+    <p>Status: {{ _request.status }}</p>
+    <p>Created At: {{ _request.created_at }}</p>
+</div>
+<div class="request-actions">
+    {% if _request.status == "Opened" %}
+        <button class="edit-btn" id="open-modal-btn">Edit</button>
+        <div class="overlay"></div>
+        <form method="POST" action="{{ url_for('update_request_details', request_id=_request.id) }}"
+              id="create-request-modal">
+            <h1>Edit Request</h1>
+            <label for="problem_title">Problem title:</label>
+            <input type="text" name="problem_title" id="problem_title" placeholder="Problem title"
+                   value="{{ _request.title }}"/>
+            <label for="problem_description">Описание проблемы:</label>
+            <textarea id="problem_description" placeholder="Описание запроса"
+                      name="problem_description">
+                                {{ _request.description }}
+                            </textarea>
+            <label for="solver">Доступные операторы:</label>
+            <select id="solver" name="solver">
+                {% for solver in solvers %}
+                    <option {{ 'selected' if solver.name == _request.solver.name }}
+                            value="{{ solver.id }}">{{ solver.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Submit">
+        </form>
+
+        <form class="close-form" method="POST"
+              action="{{ url_for('update_request_status', request_id=_request.id) }}">
+            <input type="hidden" name="status" value="Closed">
+            <button type="submit" class="close-btn">Close Request</button>
+        </form>
+    {% endif %}
+</div>
+<script>
+    const openModalBtn = document.getElementById("open-modal-btn");
+    const modal = document.getElementById("create-request-modal");
+    const overlay = document.querySelector(".overlay");
+
+    openModalBtn.onclick = function () {
+        modal.style.display = "block";
+        overlay.style.display = "block";
+    }
+    window.onclick = function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+            overlay.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>

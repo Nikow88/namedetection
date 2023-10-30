@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Профиль пользователя.</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/profile.css">
+    <style>
+        body {
+            background-color: #f2f2f2;
+            font-family: "Times New Roman", sans-serif;
+            font-size: 16px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 28px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        form {
+            background-color: black;
+            border: 1px solid #ccc;
+            border-radius: 40px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            margin: 0 auto;
+            max-width: 700px;
+            padding: 110px;
+            text-align: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            margin: 20px 0 5px;
+            text-align: left;
+        }
+
+        textarea, select {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            height: 40px;
+            margin-bottom: 20px;
+            padding: 5px;
+            resize: none;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            height: 20px;
+            margin-bottom: 20px;
+            padding: 5px;
+            resize: none;
+            width: 100%;
+        }
+
+        input[type="submit"] {
+            background-color: green;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 25px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: darkgreen;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 100%;
+            left: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9998;
+            display: none;
+        }
+
+        /* стили для черной полоски */
+        .black-bar {
+            background-color: black;
+            height: 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+
+        /* стили для надписи Profile Page */
+        .profile-title {
+            font-family: "Bauhaus 93", sans-serif;
+            position: absolute;
+            top: 0;
+            left: 10px;
+            color: white;
+            font-size: 30px;
+            line-height: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* стили для информации о пользователе */
+        .user-info {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .user-info p {
+            font-size: 20px;
+            margin: 10px;
+        }
+
+        .user-info a {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 24px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .user-info a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="black-bar">
+    <h1 class="profile-title">Profile Page</h1>
+</div>
+<div class="user-info">
+    <p>Личная информация о пользователе:
+    <p>
+    <p>Имя пользователя: {{ user.name }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Дата регистрации: {{ user.created_at }}</p>
+</div>
+<div class="user-actions">
+    <button class="button green" onclick="location.href='{{ url_for('my_requests') }}'">Список моих запросов</button>
+    <button class="button blue" id="open-modal-btn">Создать новый запрос</button>
+    <a href="{{ url_for('logout') }}" class="button red">Выйти</a>
+</div>
+<div class="overlay"></div>
+<form method="POST" action="{{ url_for('new_request') }}" id="create-request-modal">
+    <h1>Создание запроса</h1>
+    <label for="problem_title">Problem title:</label>
+    <input type="text" name="problem_title" id="problem_title" placeholder="Problem title"/>
+    <label for="problem_description">Описание проблемы:</label>
+    <textarea id="problem_description" placeholder="Описание запроса" name="problem_description"></textarea>
+    <label for="solver">Доступные операторы:</label>
+    <select id="solver" name="solver">
+        {% for solver in solvers %}
+            <option value="{{ solver.id }}">{{ solver.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Submit">
+</form>
+<script>
+    const openModalBtn = document.getElementById("open-modal-btn");
+    const modal = document.getElementById("create-request-modal");
+    const overlay = document.querySelector(".overlay");
+
+    openModalBtn.onclick = function () {
+        modal.style.display = "block";
+        overlay.style.display = "block";
+    }
+    window.onclick = function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+            overlay.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>

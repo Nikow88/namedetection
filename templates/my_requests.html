@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Список моих запросов</title>
+    <style>
+        form#create-request-modal h1 {
+            color: white;
+            font-size: 28px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        form#create-request-modal {
+            background-color: black;
+            border: 1px solid #ccc;
+            border-radius: 40px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            margin: 0 auto;
+            max-width: 700px;
+            padding: 110px;
+            text-align: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        form#create-request-modal label {
+            display: block;
+            font-size: 15px;
+            margin: 20px 0 5px;
+            text-align: left;
+        }
+
+        form#create-request-modal textarea, form#create-request-modal select {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            height: 40px;
+            margin-bottom: 20px;
+            padding: 5px;
+            resize: none;
+            width: 100%;
+        }
+
+        form#create-request-modal input[type="text"] {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            height: 20px;
+            margin-bottom: 20px;
+            padding: 5px;
+            resize: none;
+            width: 100%;
+        }
+
+        form#create-request-modal input[type="submit"] {
+            background-color: green;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 25px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        form#create-request-modal input[type="submit"]:hover {
+            background-color: darkgreen;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 100%;
+            left: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9998;
+            display: none;
+        }
+
+        .my-requests-container {
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .request-filters {
+            margin-bottom: 20px;
+        }
+
+        .request-filters label {
+            margin-right: 10px;
+        }
+
+        .requests-table {
+            border-collapse: collapse;
+            width: 100%;
+        {#color: white;#}
+        }
+
+        .requests-table th, .requests-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        {#color: white;#}
+        }
+
+        .requests-table th {
+            background-color: black;
+            font-weight: bold;
+            color: white;
+        }
+
+        .requests-table td a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .requests-table td a:hover {
+            text-decoration: underline;
+            color: white;
+        }
+
+        .edit-btn, .close-btn, .view-btn {
+            background-color: green;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .edit-btn:hover, .close-btn:hover, .view-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        .view-form, .close-form {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="my-requests-container">
+    <h2>Список моих запросов</h2>
+    <div class="request-filters">
+        <label for="status-filter">Filter by Status:</label>
+        <select id="status-filter">
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+        </select>
+        <label for="solver-filter">Filter by Solver:</label>
+        <select id="solver-filter">
+            <option value="all">All</option>
+            <option value="solver1">Solver 1</option>
+            <option value="solver2">Solver 2</option>
+            <option value="solver3">Solver 3</option>
+        </select>
+        <label for="date-filter">Filter by Date:</label>
+        <select id="date-filter">
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+        </select>
+    </div>
+    <table class="requests-table">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Solver</th>
+            <th>Date Created</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for request in requests %}
+            <tr>
+                <td><a href="#">{{ request.title }}</a></td>
+                <td>{{ request.status }}</td>
+                <td>{{ request.solver.name }}</td>
+                <td>{{ request.created_at }}</td>
+                <td>
+                    {% if request.status == "Opened" %}
+                        <button class="edit-btn" id="open-modal-btn">Edit</button>
+                        <div class="overlay"></div>
+                        <form method="POST" action="{{ url_for('update_request_details', request_id=request.id) }}"
+                              id="create-request-modal">
+                            <h1>Edit Request</h1>
+                            <label for="problem_title">Problem title:</label>
+                            <input type="text" name="problem_title" id="problem_title" placeholder="Problem title"
+                                   value="{{ request.title }}"/>
+                            <label for="problem_description">Описание проблемы:</label>
+                            <textarea id="problem_description" placeholder="Описание запроса"
+                                      name="problem_description">
+                                {{ request.description }}
+                            </textarea>
+                            <label for="solver">Доступные операторы:</label>
+                            <select id="solver" name="solver">
+                                {% for solver in solvers %}
+                                    <option {{ 'selected' if solver.name == request.solver.name }}
+                                            value="{{ solver.id }}">{{ solver.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="submit" value="Submit">
+                        </form>
+                        <form class="close-form" method="POST"
+                              action="{{ url_for('update_request_status', request_id=request.id) }}">
+                            <input type="hidden" name="status" value="Closed">
+                            <button type="submit" class="close-btn">Close</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('view_request_details', request_id=request.id) }}" class="view-form">
+                            <button type="submit" class="view-btn">View</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        const openModalBtn = document.getElementById("open-modal-btn");
+        const modal = document.getElementById("create-request-modal");
+        const overlay = document.querySelector(".overlay");
+
+        openModalBtn.onclick = function () {
+            modal.style.display = "block";
+            overlay.style.display = "block";
+        }
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+                overlay.style.display = "none";
+            }
+        }
+    </script>
+</div>

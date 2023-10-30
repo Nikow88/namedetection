@@ -1,0 +1,66 @@
+.header {
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.logo {
+  font-size: 24px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+}
+
+.user-info {
+  margin-right: 20px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.user-email {
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  display: inline-block;
+  padding: 6px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: white !important;
+  font-weight: bold;
+  background-color: green;
+  float: left;
+  margin-right: 10px;
+}
+
+.green {
+  background-color: green;
+}
+
+.green:hover {
+  background-color: darkgreen;
+}
+.profile-title {
+    font-family: "Bauhaus 93", sans-serif;
+    position: absolute;
+    top: 0;
+    left: 10px;
+    color: white;
+    font-size: 30px;
+    line-height: 30px;
+    margin: 0;
+    padding: 0;
+}
